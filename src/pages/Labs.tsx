@@ -14,6 +14,69 @@ interface Product {
   sort_order: number;
 }
 
+const ProductCard = ({ product }: { product: Product }) => {
+  const [imgError, setImgError] = useState(false);
+  const thumbUrl = `https://image.thum.io/get/width/600/${product.url}`;
+
+  return (
+    <a
+      href={product.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col h-full rounded-2xl border border-border bg-card hover:border-accent/30 hover:shadow-lg transition-all duration-300 overflow-hidden"
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video bg-secondary overflow-hidden">
+        {!imgError ? (
+          <img
+            src={thumbUrl}
+            alt={`${product.name} preview`}
+            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImgError(true)}
+            loading="lazy"
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
+            <span className="text-3xl font-bold text-muted-foreground/40">
+              {product.name.charAt(0)}
+            </span>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent" />
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-6">
+        <div className="flex items-center gap-3 mb-2">
+          {product.logo_url && (
+            <img
+              src={product.logo_url}
+              alt=""
+              className="h-6 w-6 rounded-md object-cover"
+            />
+          )}
+          <h3 className="text-lg font-semibold text-card-foreground">
+            {product.name}
+          </h3>
+          {product.tag && (
+            <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+              {product.tag}
+            </span>
+          )}
+        </div>
+
+        <p className="text-muted-foreground text-sm leading-relaxed flex-1">
+          {product.description}
+        </p>
+
+        <div className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-accent group-hover:gap-3 transition-all">
+          Visit <ExternalLink size={14} />
+        </div>
+      </div>
+    </a>
+  );
+};
+
 const Labs = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,47 +125,7 @@ const Labs = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product, i) => (
                 <FadeIn key={product.id} delay={i * 0.1}>
-                  <a
-                    href={product.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex flex-col justify-between h-full p-8 rounded-2xl border border-border bg-card hover:border-accent/30 transition-all duration-300"
-                  >
-                    <div>
-                      <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-6 overflow-hidden">
-                        {product.logo_url ? (
-                          <img
-                            src={product.logo_url}
-                            alt={`${product.name} logo`}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-lg font-semibold text-foreground">
-                            {product.name.charAt(0)}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-xl font-semibold text-card-foreground">
-                          {product.name}
-                        </h3>
-                        {product.tag && (
-                          <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-accent/10 text-accent">
-                            {product.tag}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {product.description}
-                      </p>
-                    </div>
-
-                    <div className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-accent group-hover:gap-3 transition-all">
-                      Visit <ExternalLink size={14} />
-                    </div>
-                  </a>
+                  <ProductCard product={product} />
                 </FadeIn>
               ))}
             </div>
