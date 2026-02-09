@@ -15,6 +15,7 @@ interface Submission {
   email: string;
   phone: string;
   address: string;
+  query: string | null;
   created_at: string;
 }
 
@@ -51,6 +52,7 @@ export function ContactSubmissionsTab() {
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead>Query</TableHead>
             <TableHead>Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -62,6 +64,7 @@ export function ContactSubmissionsTab() {
               <TableCell>{s.email}</TableCell>
               <TableCell>{s.phone}</TableCell>
               <TableCell>{s.address}</TableCell>
+              <TableCell className="max-w-[200px] truncate">{s.query ?? "—"}</TableCell>
               <TableCell>{format(new Date(s.created_at), "MMM d, yyyy")}</TableCell>
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)}>
@@ -72,7 +75,7 @@ export function ContactSubmissionsTab() {
           ))}
           {submissions.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
                 No submissions yet
               </TableCell>
             </TableRow>
