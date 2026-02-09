@@ -1,29 +1,30 @@
 
 
-## Add Animated AI Visual to Home Page Hero
+## Redesign Product Cards with Auto-Generated Website Thumbnails
 
 ### What changes
-Add an animated, abstract AI-themed visual element to the hero section of the home page. This will be a custom SVG-based animation built with Framer Motion -- an animated neural network / interconnected nodes graphic that floats behind the hero text, giving the page a dynamic, modern feel without relying on external images.
+Redesign the product cards on the Labs page to include a live website thumbnail preview at the top of each card, generated automatically from the product's URL using a free thumbnail service. The cards will have a more visual, modern layout.
 
-### Design Approach
-- Create a new `HeroAnimation` component with an animated network of glowing dots and connecting lines
-- Dots will gently float/pulse, lines will fade in and out -- evoking AI and neural networks
-- Uses the existing accent color (`hsl(200 60% 45%)`) for consistency
-- Positioned behind the hero text with reduced opacity so it enhances without distracting
-- Fully responsive and performant using Framer Motion (already installed)
+### Design
+Each card will feature:
+1. A website screenshot preview at the top (using `image.thum.io`, a free service that generates thumbnails from URLs -- no API key needed)
+2. A subtle gradient overlay at the bottom of the thumbnail for smooth text transition
+3. Logo + name + tag row below the image
+4. Description text
+5. "Visit" link at the bottom
+
+The thumbnail URL pattern is simply: `https://image.thum.io/get/width/600/{product_url}`
 
 ### Technical Details
 
-**New file: `src/components/HeroAnimation.tsx`**
-- Renders an SVG with ~12-15 animated nodes (circles) at various positions
-- Draws subtle connecting lines between nearby nodes
-- Each node has a Framer Motion animation: gentle floating (y oscillation) and pulsing opacity
-- Lines animate their opacity in a staggered pattern
-- The whole SVG is absolutely positioned behind the hero content
+**`src/pages/Labs.tsx`**:
+- Add a thumbnail section at the top of each card using an `<img>` tag with src `https://image.thum.io/get/width/600/${product.url}`
+- Restructure card layout: image on top, content below
+- Add a loading/placeholder state for the thumbnail using a neutral background
+- Keep the existing hover effects and transitions
+- Use `aspect-video` for consistent image dimensions
+- Add `object-cover` and `object-top` to show the top portion of the screenshot
+- Fallback to a neutral gradient background if the image fails to load
 
-**`src/pages/Index.tsx`**
-- Import and place `<HeroAnimation />` inside the hero section, behind the text (using `relative` / `absolute` positioning)
-- The hero section gets `relative overflow-hidden` to contain the animation
-- Text content remains on top with `relative z-10`
+No database changes or new dependencies needed.
 
-No new dependencies needed -- uses Framer Motion which is already installed.
