@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FadeIn } from "@/components/FadeIn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Upload, Loader2 } from "lucide-react";
 
 interface Product {
   id: string;
@@ -29,7 +29,37 @@ export function ProductsTab() {
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("product-thumbnails")
+      .upload(fileName, file);
+
+    if (error) {
+      toast({ variant: "destructive", title: "Upload failed", description: error.message });
+      setUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("product-thumbnails")
+      .getPublicUrl(fileName);
+
+    setForm((prev) => ({ ...prev, thumbnail_url: publicUrl }));
+    setUploading(false);
+    toast({ title: "Image uploaded" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const fetchProducts = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
@@ -117,6 +147,28 @@ export function ProductsTab() {
               <div className="space-y-2">
                 <Label>Thumbnail URL</Label>
                 <Input value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="Custom thumbnail (overrides auto-generated)" />
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploading ? <Loader2 size={14} className="animate-spin mr-1" /> : <Upload size={14} className="mr-1" />}
+                    {uploading ? "Uploading…" : "Upload image"}
+                  </Button>
+                  {form.thumbnail_url && (
+                    <img src={form.thumbnail_url} alt="Preview" className="h-8 w-8 rounded object-cover border border-border" />
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Tag</Label>
