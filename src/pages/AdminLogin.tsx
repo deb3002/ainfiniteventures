@@ -21,21 +21,23 @@ const AdminLogin = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    const { error } = isSignUp
-      ? await signUp(email, password)
-      : await signIn(email, password);
+    try {
+      const { error } = isSignUp
+        ? await signUp(email, password)
+        : await signIn(email, password);
 
-    setSubmitting(false);
+      if (error) {
+        toast({ variant: "destructive", title: "Error", description: error.message });
+        return;
+      }
 
-    if (error) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
-      return;
-    }
-
-    if (isSignUp) {
-      toast({ title: "Check your email", description: "We sent you a confirmation link." });
-    } else {
-      navigate("/admin/dashboard");
+      if (isSignUp) {
+        toast({ title: "Check your email", description: "We sent you a confirmation link." });
+      } else {
+        navigate("/admin/dashboard");
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
