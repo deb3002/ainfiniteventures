@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { FadeIn } from "@/components/FadeIn";
 import { ArrowRight, Brain, BarChart3, Workflow, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const services = [
   {
@@ -130,12 +131,12 @@ const Consulting = () => {
                   Let's discuss how we can help you unlock value with artificial intelligence.
                 </p>
               </div>
-              <a
-                href="mailto:hello@ainfinite.com"
+              <Link
+                to="/contact"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity shrink-0"
               >
                 Get in touch <ArrowRight size={16} />
-              </a>
+              </Link>
             </div>
           </FadeIn>
         </div>

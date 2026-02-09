@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Labs from "./pages/Labs";
 import Consulting from "./pages/Consulting";
+import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/labs" element={<Labs />} />
             <Route path="/consulting" element={<Consulting />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route
               path="/admin/dashboard"
