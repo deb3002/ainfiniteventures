@@ -105,7 +105,7 @@ const Labs = () => {
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-[1.1] text-balance">
-              Consumer AI products that people love
+              AI products that people love
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
