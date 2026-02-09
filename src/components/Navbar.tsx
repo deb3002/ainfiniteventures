@@ -27,9 +27,11 @@ export function Navbar() {
     }
   };
 
+  const showAuth = location.pathname === "/labs" || !!user;
+
   const navLinks = [
     ...baseLinks,
-    { label: user ? "Logout" : "Login", to: user ? "#" : "/admin" },
+    ...(showAuth ? [{ label: user ? "Logout" : "Login", to: user ? "#" : "/admin" }] : []),
   ];
 
   return (
