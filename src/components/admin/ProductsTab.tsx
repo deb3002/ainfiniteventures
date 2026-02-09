@@ -33,12 +33,27 @@ export function ProductsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast({ variant: "destructive", title: "Invalid file type", description: "Please upload a JPG, PNG, WebP, or GIF image" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 5MB" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
-    const fileExt = file.name.split(".").pop();
+    const fileExt = file.type.split("/")[1];
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
     const { error } = await supabase.storage
