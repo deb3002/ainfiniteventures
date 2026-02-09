@@ -11,12 +11,13 @@ interface Product {
   url: string;
   logo_url: string | null;
   tag: string | null;
+  thumbnail_url: string | null;
   sort_order: number;
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
   const [imgError, setImgError] = useState(false);
-  const thumbUrl = `https://image.thum.io/get/width/600/${product.url}`;
+  const thumbUrl = product.thumbnail_url || `https://image.thum.io/get/width/600/${product.url}`;
 
   return (
     <a
