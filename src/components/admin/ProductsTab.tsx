@@ -18,10 +18,11 @@ interface Product {
   url: string;
   logo_url: string | null;
   tag: string | null;
+  thumbnail_url: string | null;
   sort_order: number;
 }
 
-const emptyProduct = { name: "", description: "", url: "", logo_url: "", tag: "", sort_order: 0 };
+const emptyProduct = { name: "", description: "", url: "", logo_url: "", tag: "", thumbnail_url: "", sort_order: 0 };
 
 export function ProductsTab() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -44,6 +45,7 @@ export function ProductsTab() {
       url: form.url,
       logo_url: form.logo_url || null,
       tag: form.tag || null,
+      thumbnail_url: form.thumbnail_url || null,
       sort_order: form.sort_order,
     };
 
@@ -66,7 +68,7 @@ export function ProductsTab() {
   const handleEdit = (p: Product) => {
     setForm({
       name: p.name, description: p.description, url: p.url,
-      logo_url: p.logo_url ?? "", tag: p.tag ?? "", sort_order: p.sort_order,
+      logo_url: p.logo_url ?? "", tag: p.tag ?? "", thumbnail_url: p.thumbnail_url ?? "", sort_order: p.sort_order,
     });
     setEditingId(p.id);
     setShowForm(true);
@@ -111,6 +113,10 @@ export function ProductsTab() {
               <div className="space-y-2">
                 <Label>Logo URL</Label>
                 <Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Thumbnail URL</Label>
+                <Input value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="Custom thumbnail (overrides auto-generated)" />
               </div>
               <div className="space-y-2">
                 <Label>Tag</Label>
