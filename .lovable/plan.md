@@ -1,26 +1,71 @@
 
 
-## Fix: Login Button Stuck on "Please wait..."
+## Contact Page with Admin-Visible Submissions
 
-### Problem
-There's a race condition in `AuthContext.tsx`. The `onAuthStateChange` listener and `getSession()` both run on mount, and both `await checkAdmin()` before setting `loading = false`. When a login event fires, `onAuthStateChange` triggers but the async `checkAdmin` call can cause the `submitting` state in `AdminLogin` to never reset, because the navigation to `/admin/dashboard` depends on the auth state settling properly.
+### Overview
+Create a `/contact` page with a form (name, email, phone, address). Submissions are saved to the database and visible to admins on the dashboard -- no email notifications needed.
 
-Additionally, the `AdminLogin` component sets `submitting` to true but only resets it on error -- on successful sign-in, the `onAuthStateChange` callback fires and the component may re-render in a state where `submitting` is still true.
+### Changes
 
-### Solution
-Refactor `AuthContext.tsx` to separate the initial load from ongoing auth changes (matching the proven pattern from the stack overflow solution):
+**1. Database -- new `contact_submissions` table**
+- Columns: `id`, `name`, `email`, `phone`, `address`, `created_at`
+- RLS: anyone can INSERT, only admins can SELECT and DELETE
 
-1. **Initial load** controls `loading` state -- awaits both session fetch and role check before setting `loading = false`
-2. **`onAuthStateChange` listener** updates session/user/role but does NOT await or control `loading`
-3. Add `isMounted` guard to prevent state updates after unmount
+**2. New page -- `src/pages/Contact.tsx`**
+- Form with zod validation for name, email, phone, address
+- Uses react-hook-form for form state
+- Inserts into `contact_submissions` on submit
+- Shows success/error toast
+- Styled consistently with existing pages (Layout, FadeIn)
 
-### File Changes
+**3. Admin Dashboard -- add submissions tab**
+- Add a tabbed view to `src/pages/AdminDashboard.tsx`: "Products" and "Contact Submissions"
+- Contact Submissions tab shows a table with name, email, phone, address, date
+- Admins can delete submissions they've reviewed
 
-**`src/contexts/AuthContext.tsx`**
-- Restructure the `useEffect` to have `initializeAuth()` control the `loading` state
-- Make `onAuthStateChange` fire-and-forget for `checkAdmin` (no await)
-- Add `isMounted` cleanup flag
+**4. Routing and navigation**
+- Add `/contact` route in `App.tsx`
+- Add "Contact" link in the navbar
 
-**`src/pages/AdminLogin.tsx`**
-- Ensure `submitting` resets properly on success by resetting it in a `finally` block before navigating
+### Technical Details
 
+**Database migration:**
+```sql
+CREATE TABLE public.contact_submissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL,
+  phone text NOT NULL,
+  address text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit contact form"
+  ON public.contact_submissions FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Admins can view submissions"
+  ON public.contact_submissions FOR SELECT
+  TO authenticated
+  USING (has_role(auth.uid(), 'admin'::app_role));
+
+CREATE POLICY "Admins can delete submissions"
+  ON public.contact_submissions FOR DELETE
+  TO authenticated
+  USING (has_role(auth.uid(), 'admin'::app_role));
+```
+
+**Contact form validation:**
+```typescript
+const contactSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
+  email: z.string().trim().email("Invalid email").max(255),
+  phone: z.string().trim().min(1, "Phone is required").max(20),
+  address: z.string().trim().min(1, "Address is required").max(500),
+});
+```
+
+**Admin Dashboard tabs** will use the existing Radix Tabs component to switch between Products and Contact Submissions views.
