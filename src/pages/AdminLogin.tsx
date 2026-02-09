@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+type View = "login" | "signup" | "forgot";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [view, setView] = useState<View>("login");
   const [submitting, setSubmitting] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -22,7 +25,20 @@ const AdminLogin = () => {
     setSubmitting(true);
 
     try {
-      const { error } = isSignUp
+      if (view === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/admin/reset-password",
+        });
+        if (error) {
+          toast({ variant: "destructive", title: "Error", description: error.message });
+        } else {
+          toast({ title: "Check your email", description: "We sent you a password reset link." });
+          setView("login");
+        }
+        return;
+      }
+
+      const { error } = view === "signup"
         ? await signUp(email, password)
         : await signIn(email, password);
 
@@ -31,7 +47,7 @@ const AdminLogin = () => {
         return;
       }
 
-      if (isSignUp) {
+      if (view === "signup") {
         toast({ title: "Check your email", description: "We sent you a confirmation link." });
       } else {
         navigate("/admin/dashboard");
@@ -41,13 +57,15 @@ const AdminLogin = () => {
     }
   };
 
+  const title = view === "forgot" ? "Reset Password" : view === "signup" ? "Admin Sign Up" : "Admin Login";
+
   return (
     <Layout>
       <section className="py-24 md:py-36 px-6">
         <div className="max-w-sm mx-auto">
           <FadeIn>
             <h1 className="text-3xl font-semibold text-foreground mb-8 text-center">
-              Admin {isSignUp ? "Sign Up" : "Login"}
+              {title}
             </h1>
           </FadeIn>
 
@@ -64,31 +82,53 @@ const AdminLogin = () => {
                   placeholder="you@example.com"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
-              </div>
+
+              {view !== "forgot" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
+
               <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Please wait…" : isSignUp ? "Sign Up" : "Sign In"}
+                {submitting
+                  ? "Please wait…"
+                  : view === "forgot"
+                  ? "Send Reset Link"
+                  : view === "signup"
+                  ? "Sign Up"
+                  : "Sign In"}
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              {isSignUp ? "Already have an account?" : "Need an account?"}{" "}
+            {view === "login" && (
+              <p className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setView("forgot")}
+                  className="text-sm text-muted-foreground hover:text-accent hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </p>
+            )}
+
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              {view === "signup" ? "Already have an account?" : view === "login" ? "Need an account?" : "Back to"}{" "}
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => setView(view === "signup" ? "login" : view === "forgot" ? "login" : "signup")}
                 className="text-accent hover:underline font-medium"
               >
-                {isSignUp ? "Sign In" : "Sign Up"}
+                {view === "signup" ? "Sign In" : view === "login" ? "Sign Up" : "Sign In"}
               </button>
             </p>
           </FadeIn>
