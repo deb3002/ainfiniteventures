@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { FadeIn } from "@/components/FadeIn";
+import { HeroAnimation } from "@/components/HeroAnimation";
 import { Link } from "react-router-dom";
 import { ArrowRight, Cpu, Users } from "lucide-react";
 
@@ -7,8 +8,9 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="py-32 md:py-48 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative overflow-hidden py-32 md:py-48 px-6">
+        <HeroAnimation />
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
           <FadeIn>
             <p className="text-sm font-medium text-accent tracking-widest uppercase mb-6">
               Ainfinite Ventures LLP
