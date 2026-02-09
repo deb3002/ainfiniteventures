@@ -22,6 +22,7 @@ export type Database = {
           id: string
           name: string
           phone: string
+          query: string | null
         }
         Insert: {
           address: string
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           name: string
           phone: string
+          query?: string | null
         }
         Update: {
           address?: string
@@ -38,6 +40,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          query?: string | null
         }
         Relationships: []
       }

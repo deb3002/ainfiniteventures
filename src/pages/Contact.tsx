@@ -17,6 +17,7 @@ const contactSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255),
   phone: z.string().trim().min(1, "Phone number is required").max(20),
   address: z.string().trim().min(1, "Address is required").max(500),
+  query: z.string().trim().max(1000, "Query must be less than 1000 characters").optional(),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;
@@ -41,6 +42,7 @@ const Contact = () => {
       email: data.email,
       phone: data.phone,
       address: data.address,
+      query: data.query || null,
     });
     setSubmitting(false);
 
@@ -98,6 +100,11 @@ const Contact = () => {
                   <Input id="address" placeholder="City, Country" {...register("address")} />
                   {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="query">Your Query</Label>
+                <Textarea id="query" placeholder="Tell us what you'd like to connect about…" rows={4} {...register("query")} />
+                {errors.query && <p className="text-sm text-destructive">{errors.query.message}</p>}
               </div>
               <Button type="submit" disabled={submitting} className="w-full md:w-auto">
                 <Send size={16} />
