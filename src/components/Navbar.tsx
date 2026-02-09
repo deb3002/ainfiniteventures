@@ -7,6 +7,7 @@ const navLinks = [
   { label: "Home", to: "/" },
   { label: "Ainfinite Labs", to: "/labs" },
   { label: "Ainfinite AI", to: "/consulting" },
+  { label: "Login", to: "/admin" },
 ];
 
 export function Navbar() {
