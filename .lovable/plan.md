@@ -1,22 +1,26 @@
 
 
-## Add Query/Message Field to Contact Form
+## Add Reset Password Option to Admin Login
 
 ### What changes
-Add a "Query" textarea field to the contact form so users can describe what they want to connect about.
+Add a "Forgot Password?" link on the admin login page that triggers a password reset email via the built-in authentication system, plus a simple password reset confirmation page.
 
 ### Technical Details
 
-**Database migration**: Add a nullable `query` column to `contact_submissions` table (nullable so existing rows aren't affected):
-```sql
-ALTER TABLE public.contact_submissions ADD COLUMN query text;
-```
+**`src/pages/AdminLogin.tsx`**:
+- Add a "Forgot Password?" link below the password field
+- When clicked, show an email-only form that calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/admin/reset-password" })`
+- Toggle between login/signup/forgot-password views using state
+- Show a toast confirming the reset email was sent
 
-**`src/pages/Contact.tsx`**:
-- Add `query` (optional) to the zod schema with max 1000 characters
-- Add a full-width Textarea field below the Address row, labeled "Your Query"
-- Include it in the Supabase insert call
+**`src/pages/ResetPassword.tsx`** (new):
+- A page where users land after clicking the reset link in their email
+- Contains a form with "New Password" and "Confirm Password" fields
+- Calls `supabase.auth.updateUser({ password })` to set the new password
+- On success, redirects to `/admin`
 
-**`src/components/admin/ContactSubmissionsTab.tsx`**:
-- Add a "Query" column to the admin submissions table so admins can see what was submitted
+**`src/App.tsx`**:
+- Add route `/admin/reset-password` pointing to the new ResetPassword page
+
+No database changes needed -- password reset is handled entirely by the authentication system.
 
