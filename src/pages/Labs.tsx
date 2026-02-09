@@ -1,44 +1,34 @@
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { FadeIn } from "@/components/FadeIn";
 import { ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-// ────────────────────────────────────────
-// ADD NEW PRODUCTS HERE
-// Each product needs: name, description, url, and optionally a logoUrl
-// ────────────────────────────────────────
 interface Product {
+  id: string;
   name: string;
   description: string;
   url: string;
-  logoUrl?: string;
-  /** Short tag like "Beta", "New", etc. */
-  tag?: string;
+  logo_url: string | null;
+  tag: string | null;
+  sort_order: number;
 }
 
-const products: Product[] = [
-  {
-    name: "Product One",
-    description:
-      "An intelligent assistant that understands context and helps you work smarter, not harder.",
-    url: "https://example.com",
-    tag: "Coming Soon",
-  },
-  {
-    name: "Product Two",
-    description:
-      "AI-powered analytics that turn raw data into actionable insights in seconds.",
-    url: "https://example.com",
-    tag: "Beta",
-  },
-  {
-    name: "Product Three",
-    description:
-      "Natural language interfaces that make complex systems accessible to everyone.",
-    url: "https://example.com",
-  },
-];
-
 const Labs = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("products")
+      .select("*")
+      .order("sort_order")
+      .then(({ data }) => {
+        if (data) setProducts(data);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <Layout>
       {/* Hero */}
@@ -66,54 +56,57 @@ const Labs = () => {
       {/* Products Grid */}
       <section className="px-6 pb-32">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, i) => (
-              <FadeIn key={product.name} delay={i * 0.1}>
-                <a
-                  href={product.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col justify-between h-full p-8 rounded-2xl border border-border bg-card hover:border-accent/30 transition-all duration-300"
-                >
-                  <div>
-                    {/* Logo or fallback initial */}
-                    <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-6 overflow-hidden">
-                      {product.logoUrl ? (
-                        <img
-                          src={product.logoUrl}
-                          alt={`${product.name} logo`}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-lg font-semibold text-foreground">
-                          {product.name.charAt(0)}
-                        </span>
-                      )}
+          {loading ? (
+            <p className="text-center text-muted-foreground">Loading products…</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product, i) => (
+                <FadeIn key={product.id} delay={i * 0.1}>
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col justify-between h-full p-8 rounded-2xl border border-border bg-card hover:border-accent/30 transition-all duration-300"
+                  >
+                    <div>
+                      <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center mb-6 overflow-hidden">
+                        {product.logo_url ? (
+                          <img
+                            src={product.logo_url}
+                            alt={`${product.name} logo`}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-lg font-semibold text-foreground">
+                            {product.name.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-xl font-semibold text-card-foreground">
+                          {product.name}
+                        </h3>
+                        {product.tag && (
+                          <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                            {product.tag}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {product.description}
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-xl font-semibold text-card-foreground">
-                        {product.name}
-                      </h3>
-                      {product.tag && (
-                        <span className="text-[11px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full bg-accent/10 text-accent">
-                          {product.tag}
-                        </span>
-                      )}
+                    <div className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-accent group-hover:gap-3 transition-all">
+                      Visit <ExternalLink size={14} />
                     </div>
-
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {product.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-accent group-hover:gap-3 transition-all">
-                    Visit <ExternalLink size={14} />
-                  </div>
-                </a>
-              </FadeIn>
-            ))}
-          </div>
+                  </a>
+                </FadeIn>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </Layout>
