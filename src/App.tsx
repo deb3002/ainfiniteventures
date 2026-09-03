@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Labs from "./pages/Labs";
 import Consulting from "./pages/Consulting";
 import Contact from "./pages/Contact";
+import EsgProfile from "./pages/EsgProfile";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ResetPassword from "./pages/ResetPassword";
