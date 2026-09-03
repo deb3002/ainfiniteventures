@@ -9,6 +9,7 @@ const baseLinks = [
   { label: "Home", to: "/" },
   { label: "Ainfinite Labs", to: "/labs" },
   { label: "Ainfinite AI", to: "/consulting" },
+  { label: "ESG Profile", to: "/esg" },
   { label: "Contact", to: "/contact" },
 ];
 
