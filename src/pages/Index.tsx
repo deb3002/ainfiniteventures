@@ -102,7 +102,7 @@ const Index = () => {
               </p>
               <Link
                 to="/esg"
-                className="inline-flex items-center gap-2 mt-8 text-sm font-medium text-accent group-hover:gap-3 transition-all"
+                className="group inline-flex items-center gap-2 mt-8 text-sm font-medium text-accent hover:gap-3 transition-all"
               >
                 Explore our ESG Disclosure Profile <ArrowRight size={16} />
               </Link>
