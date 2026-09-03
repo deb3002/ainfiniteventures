@@ -13,6 +13,7 @@ const routeLabels: Record<string, string> = {
   labs: "Ainfinite Labs",
   consulting: "Ainfinite AI",
   contact: "Contact",
+  esg: "ESG Profile",
   admin: "Admin",
   dashboard: "Dashboard",
   "reset-password": "Reset Password",
