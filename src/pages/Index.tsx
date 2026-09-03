@@ -23,8 +23,8 @@ const Index = () => {
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              We build transformative AI products and deliver enterprise-grade AI solutions — 
-              all under one roof.
+              We build transformative AI products, deliver enterprise-grade AI solutions, and
+              bring transparency to sustainability through our ESG disclosure work — all under one roof.
             </p>
           </FadeIn>
         </div>
@@ -93,9 +93,19 @@ const Index = () => {
                 Intelligence. Integrity. Impact.
               </h2>
               <p className="text-primary-foreground/70 max-w-xl mx-auto leading-relaxed">
-                From ideation to deployment, we bring deep technical expertise and a commitment to 
+                From ideation to deployment, we bring deep technical expertise and a commitment to
                 building AI that creates real value for people and businesses.
               </p>
+              <p className="text-primary-foreground/70 max-w-xl mx-auto leading-relaxed mt-6">
+                That same commitment extends to how we report on sustainability — openly and
+                verifiably, through our ESG disclosure profile.
+              </p>
+              <Link
+                to="/esg"
+                className="group inline-flex items-center gap-2 mt-8 text-sm font-medium text-accent hover:gap-3 transition-all"
+              >
+                Explore our ESG Disclosure Profile <ArrowRight size={16} />
+              </Link>
             </div>
           </FadeIn>
         </div>
