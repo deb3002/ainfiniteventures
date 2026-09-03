@@ -1,38 +1,25 @@
+# ESG Dashboard Subpage
 
+Note: `github.com/deb3002/esg-dashboard` is not publicly readable (returns 404 without access), so the exact charts and metrics from that repo could not be inspected. This plan builds a native ESG dashboard page using the standard ESG structure and sample data. If you paste the repo's key screens or make it public, the page can be adjusted to match exactly.
 
-## Add Image Upload for Product Thumbnails
+## What you'll get
 
-### What changes
-Add the ability to upload an image file directly from the admin dashboard as a product thumbnail, in addition to the existing URL input. Uploaded images will be stored in Lovable Cloud file storage.
+A public page at `/esg` — "ESG Dashboard" — styled with the existing site design (whitespace-heavy, teal accent, dark/light mode aware), linked from the navbar and reachable via breadcrumbs.
 
-### How it works
-1. A new storage bucket called `product-thumbnails` will hold uploaded images
-2. In the admin product form, a file input will appear next to the existing "Thumbnail URL" field
-3. When you pick a file, it uploads to storage and automatically fills in the thumbnail URL
-4. You can still paste a URL manually if you prefer
+Page sections:
+1. Hero: eyebrow label, H1, one-line intro.
+2. KPI row: 4 stat cards — Carbon Emissions (tCO2e), Renewable Energy Share, Water Intensity, ESG Score.
+3. Environmental: emissions trend line chart (Scope 1/2/3 over 12 months) + energy mix donut chart.
+4. Social: bar chart for workforce diversity / training hours / safety incidents.
+5. Governance: compact table of governance indicators with status badges.
+6. Footer note stating figures are illustrative sample data.
 
-### Technical Details
+All figures come from a sample data file in the frontend — no database, no auth. Fully responsive, cards reuse existing border/card tokens.
 
-**Database migration (storage bucket + RLS):**
-- Create a public `product-thumbnails` storage bucket
-- Add RLS policies: admins can upload/delete, anyone can view
+## Technical details
 
-```sql
-INSERT INTO storage.buckets (id, name, public) VALUES ('product-thumbnails', 'product-thumbnails', true);
-
-CREATE POLICY "Anyone can view thumbnails" ON storage.objects FOR SELECT USING (bucket_id = 'product-thumbnails');
-CREATE POLICY "Admins can upload thumbnails" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'product-thumbnails' AND public.has_role(auth.uid(), 'admin'));
-CREATE POLICY "Admins can update thumbnails" ON storage.objects FOR UPDATE USING (bucket_id = 'product-thumbnails' AND public.has_role(auth.uid(), 'admin'));
-CREATE POLICY "Admins can delete thumbnails" ON storage.objects FOR DELETE USING (bucket_id = 'product-thumbnails' AND public.has_role(auth.uid(), 'admin'));
-```
-
-**`src/components/admin/ProductsTab.tsx`:**
-- Add a file `<input type="file" accept="image/*">` below the Thumbnail URL field
-- On file select, upload to `product-thumbnails` bucket using `supabase.storage.from('product-thumbnails').upload()`
-- Generate the public URL using `supabase.storage.from('product-thumbnails').getPublicUrl()`
-- Set the resulting URL into `form.thumbnail_url`
-- Show a loading indicator during upload
-
-**`src/pages/Labs.tsx`:**
-- No changes needed -- it already uses `product.thumbnail_url` when available
-
+- New `src/pages/EsgDashboard.tsx` wrapped in the existing `Layout`, using `FadeIn` for entrance animation.
+- New `src/data/esg.ts` exporting typed sample datasets (KPIs, monthly emissions, energy mix, social metrics, governance rows).
+- Charts via `recharts` (already available through the shadcn chart setup) with `src/components/ui/chart.tsx` wrappers; colors from semantic CSS tokens (`--accent`, `--primary`, `--muted`) — no hardcoded hex or `text-white`.
+- Route `/esg` added in `src/App.tsx`; `esg` label added to `routeLabels` in `src/components/Breadcrumbs.tsx`; nav entry "ESG Dashboard" added to `baseLinks` in `src/components/Navbar.tsx`.
+- SEO: single H1, descriptive section headings, `alt` text where images apply.
