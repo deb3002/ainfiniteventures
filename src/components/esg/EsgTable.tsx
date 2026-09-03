@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { EsgRowData } from "@/lib/esg";
 import { EsgRow } from "./EsgRow";
 
