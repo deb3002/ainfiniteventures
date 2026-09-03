@@ -30,9 +30,9 @@ export function EsgTable({ rows }: { rows: EsgRowData[] }) {
           </tr>
         </thead>
         <tbody>
-          {groups.map((group) => (
-            <>
-              <tr key={`cat-${group.category}`} className="bg-secondary/60">
+          {groups.map((group, gi) => (
+            <Fragment key={`${group.category}-${gi}`}>
+              <tr className="bg-secondary/60">
                 <th
                   scope="colgroup"
                   colSpan={4}
@@ -44,7 +44,7 @@ export function EsgTable({ rows }: { rows: EsgRowData[] }) {
               {group.rows.map((row, i) => (
                 <EsgRow key={`${group.category}-${row.subfactor}-${i}`} row={row} />
               ))}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>
