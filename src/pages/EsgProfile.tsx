@@ -136,7 +136,11 @@ const EsgProfile = () => {
                     </Button>
                   </div>
                 ) : (
-                  <EsgTable rows={visibleRows} />
+                  <EsgTable
+                    rows={visibleRows}
+                    framework={framework}
+                    ifcNames={data.ifcNames ?? {}}
+                  />
                 )}
               </>
             )}
