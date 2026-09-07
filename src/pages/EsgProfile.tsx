@@ -48,12 +48,18 @@ const EsgProfile = () => {
     [data, theme],
   );
   const keywords = useMemo(() => sortedKeywords(keywordCounts), [keywordCounts]);
+  const frameworkCounts = useMemo(
+    () => computeFrameworkCounts(data?.rows ?? []),
+    [data],
+  );
 
   const visibleRows = useMemo(() => {
     if (!data) return [];
     const query = search.trim().toLowerCase();
-    return data.rows.filter((row) => rowMatches(row, theme, keyword, query));
-  }, [data, theme, keyword, search]);
+    return data.rows.filter((row) =>
+      rowMatches(row, theme, keyword, query, framework),
+    );
+  }, [data, theme, keyword, search, framework]);
 
   const handleThemeChange = (value: string) => {
     setTheme(value);
@@ -63,6 +69,7 @@ const EsgProfile = () => {
   const clearFilters = () => {
     setTheme(ALL_THEMES);
     setKeyword(ALL_KEYWORDS);
+    setFramework(ALL_FRAMEWORKS);
     setSearch("");
   };
 
