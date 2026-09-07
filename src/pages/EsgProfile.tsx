@@ -115,6 +115,9 @@ const EsgProfile = () => {
                   keywordCounts={keywordCounts}
                   keyword={keyword}
                   onKeywordChange={setKeyword}
+                  framework={framework}
+                  frameworkCounts={frameworkCounts}
+                  onFrameworkChange={setFramework}
                   search={search}
                   onSearchChange={setSearch}
                   onDownload={() => downloadCsv(data.company, visibleRows)}
