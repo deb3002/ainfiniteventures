@@ -8,7 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ALL_KEYWORDS, ALL_THEMES } from "@/lib/esg";
+import {
+  ALL_FRAMEWORKS,
+  ALL_KEYWORDS,
+  ALL_THEMES,
+  FRAMEWORK_ORDER,
+} from "@/lib/esg";
 
 interface EsgFilterBarProps {
   themes: string[];
@@ -18,6 +23,9 @@ interface EsgFilterBarProps {
   keywordCounts: Record<string, number>;
   keyword: string;
   onKeywordChange: (value: string) => void;
+  framework: string;
+  frameworkCounts: Record<string, number>;
+  onFrameworkChange: (value: string) => void;
   search: string;
   onSearchChange: (value: string) => void;
   onDownload: () => void;
