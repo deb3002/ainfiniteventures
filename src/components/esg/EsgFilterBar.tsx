@@ -87,6 +87,23 @@ export function EsgFilterBar({
             </SelectContent>
           </Select>
 
+          <Select value={framework} onValueChange={onFrameworkChange}>
+            <SelectTrigger
+              className="w-full sm:w-[210px]"
+              aria-label="Filter by framework"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_FRAMEWORKS}>{ALL_FRAMEWORKS}</SelectItem>
+              {FRAMEWORK_ORDER.filter((f) => frameworkCounts[f]).map((f) => (
+                <SelectItem key={f} value={f}>
+                  {f} ({frameworkCounts[f]})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <div className="relative w-full sm:w-[260px]">
             <Input
               type="text"
