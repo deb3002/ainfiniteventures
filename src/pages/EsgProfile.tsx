@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { EsgFilterBar } from "@/components/esg/EsgFilterBar";
 import { EsgTable } from "@/components/esg/EsgTable";
 import {
+  ALL_FRAMEWORKS,
   ALL_KEYWORDS,
   ALL_THEMES,
   EsgData,
   downloadCsv,
+  frameworkCounts as computeFrameworkCounts,
   keywordCountsForTheme,
   rowMatches,
   sortedKeywords,
@@ -19,6 +21,7 @@ const EsgProfile = () => {
   const [error, setError] = useState(false);
   const [theme, setTheme] = useState(ALL_THEMES);
   const [keyword, setKeyword] = useState(ALL_KEYWORDS);
+  const [framework, setFramework] = useState(ALL_FRAMEWORKS);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
