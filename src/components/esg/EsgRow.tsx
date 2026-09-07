@@ -1,19 +1,54 @@
 import { useState } from "react";
 import { EsgRowData, formatMetricValue } from "@/lib/esg";
+import { EsgSeriesChart } from "./EsgSeriesChart";
 
 export function EsgRow({ row }: { row: EsgRowData }) {
   const [expanded, setExpanded] = useState(false);
   const isLong = row.highlights.length > 420;
+
+  const frameworks = row.frameworks ?? [];
+  const frameworkNames = frameworks.map((f) => f.name);
+  const visibleKeywords = row.keywords.filter(
+    (kw) => !frameworkNames.includes(kw),
+  );
+  const series = row.series ?? [];
+  const standalone = row.standalone ?? (row.series ? [] : row.metrics);
 
   return (
     <tr className="border-b border-border/60 align-top">
       <td className="py-5 pr-4 w-[18%] text-sm font-medium text-foreground">
         {row.subfactor}
       </td>
-      <td className="py-5 pr-4 w-[14%]">
-        {row.keywords.length > 0 && (
+      <td className="py-5 pr-4 w-[16%]">
+        {frameworks.length > 0 && (
+          <div className="mb-2 flex flex-col gap-1.5">
+            {frameworks.map((f, i) => (
+              <div key={i} className="flex flex-wrap items-baseline gap-1.5">
+                <span
+                  className={`text-[11px] font-semibold tracking-wide px-2 py-0.5 rounded-full ${
+                    f.verified
+                      ? "bg-accent/15 text-accent"
+                      : "border border-dashed border-muted-foreground/50 text-muted-foreground"
+                  }`}
+                  title={f.verified ? undefined : "Provisional mapping — unverified"}
+                >
+                  {f.name}
+                </span>
+                {f.detail && (
+                  <span
+                    className="text-[11px] text-muted-foreground"
+                    title={f.source ? `Source: ${f.source}` : undefined}
+                  >
+                    {f.detail}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {visibleKeywords.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {row.keywords.map((kw) => (
+            {visibleKeywords.map((kw) => (
               <span
                 key={kw}
                 className="text-[11px] font-medium tracking-wide px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground"
@@ -24,7 +59,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
           </div>
         )}
       </td>
-      <td className="py-5 pr-4 w-[18%]">
+      <td className="py-5 pr-4 w-[16%]">
         {row.documents.length > 0 && (
           <div className="flex flex-col gap-1.5">
             {row.documents.map((doc, i) =>
@@ -48,16 +83,23 @@ export function EsgRow({ row }: { row: EsgRowData }) {
         )}
       </td>
       <td className="py-5 w-[50%]">
-        {row.metrics.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-6 rounded-xl border border-border bg-secondary/40 p-4 print:border-border">
-            {row.metrics.map((m, i) => (
-              <div key={i}>
-                <div className="text-lg font-semibold text-foreground tabular-nums">
-                  {formatMetricValue(m.value)}
-                </div>
-                <div className="text-xs text-muted-foreground">{m.label}</div>
-              </div>
+        {(series.length > 0 || standalone.length > 0) && (
+          <div className="mb-4 flex flex-col gap-3">
+            {series.map((s, i) => (
+              <EsgSeriesChart key={i} series={s} />
             ))}
+            {standalone.length > 0 && (
+              <div className="flex flex-wrap gap-6 rounded-xl border border-border bg-secondary/40 p-4">
+                {standalone.map((m, i) => (
+                  <div key={i}>
+                    <div className="text-lg font-semibold text-foreground tabular-nums">
+                      {formatMetricValue(m.value)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{m.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         <p

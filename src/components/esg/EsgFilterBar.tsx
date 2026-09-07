@@ -8,7 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ALL_KEYWORDS, ALL_THEMES } from "@/lib/esg";
+import {
+  ALL_FRAMEWORKS,
+  ALL_KEYWORDS,
+  ALL_THEMES,
+  FRAMEWORK_ORDER,
+} from "@/lib/esg";
 
 interface EsgFilterBarProps {
   themes: string[];
@@ -18,6 +23,9 @@ interface EsgFilterBarProps {
   keywordCounts: Record<string, number>;
   keyword: string;
   onKeywordChange: (value: string) => void;
+  framework: string;
+  frameworkCounts: Record<string, number>;
+  onFrameworkChange: (value: string) => void;
   search: string;
   onSearchChange: (value: string) => void;
   onDownload: () => void;
@@ -34,6 +42,9 @@ export function EsgFilterBar({
   keywordCounts,
   keyword,
   onKeywordChange,
+  framework,
+  frameworkCounts,
+  onFrameworkChange,
   search,
   onSearchChange,
   onDownload,
@@ -71,6 +82,23 @@ export function EsgFilterBar({
               {keywords.map((kw) => (
                 <SelectItem key={kw} value={kw}>
                   {kw} ({keywordCounts[kw]})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={framework} onValueChange={onFrameworkChange}>
+            <SelectTrigger
+              className="w-full sm:w-[210px]"
+              aria-label="Filter by framework"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_FRAMEWORKS}>{ALL_FRAMEWORKS}</SelectItem>
+              {FRAMEWORK_ORDER.filter((f) => frameworkCounts[f]).map((f) => (
+                <SelectItem key={f} value={f}>
+                  {f} ({frameworkCounts[f]})
                 </SelectItem>
               ))}
             </SelectContent>

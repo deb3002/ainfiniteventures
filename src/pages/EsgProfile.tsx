@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { EsgFilterBar } from "@/components/esg/EsgFilterBar";
 import { EsgTable } from "@/components/esg/EsgTable";
 import {
+  ALL_FRAMEWORKS,
   ALL_KEYWORDS,
   ALL_THEMES,
   EsgData,
   downloadCsv,
+  frameworkCounts as computeFrameworkCounts,
   keywordCountsForTheme,
   rowMatches,
   sortedKeywords,
@@ -19,6 +21,7 @@ const EsgProfile = () => {
   const [error, setError] = useState(false);
   const [theme, setTheme] = useState(ALL_THEMES);
   const [keyword, setKeyword] = useState(ALL_KEYWORDS);
+  const [framework, setFramework] = useState(ALL_FRAMEWORKS);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -45,12 +48,18 @@ const EsgProfile = () => {
     [data, theme],
   );
   const keywords = useMemo(() => sortedKeywords(keywordCounts), [keywordCounts]);
+  const frameworkCounts = useMemo(
+    () => computeFrameworkCounts(data?.rows ?? []),
+    [data],
+  );
 
   const visibleRows = useMemo(() => {
     if (!data) return [];
     const query = search.trim().toLowerCase();
-    return data.rows.filter((row) => rowMatches(row, theme, keyword, query));
-  }, [data, theme, keyword, search]);
+    return data.rows.filter((row) =>
+      rowMatches(row, theme, keyword, query, framework),
+    );
+  }, [data, theme, keyword, search, framework]);
 
   const handleThemeChange = (value: string) => {
     setTheme(value);
@@ -60,6 +69,7 @@ const EsgProfile = () => {
   const clearFilters = () => {
     setTheme(ALL_THEMES);
     setKeyword(ALL_KEYWORDS);
+    setFramework(ALL_FRAMEWORKS);
     setSearch("");
   };
 
@@ -105,6 +115,9 @@ const EsgProfile = () => {
                   keywordCounts={keywordCounts}
                   keyword={keyword}
                   onKeywordChange={setKeyword}
+                  framework={framework}
+                  frameworkCounts={frameworkCounts}
+                  onFrameworkChange={setFramework}
                   search={search}
                   onSearchChange={setSearch}
                   onDownload={() => downloadCsv(data.company, visibleRows)}
@@ -123,7 +136,11 @@ const EsgProfile = () => {
                     </Button>
                   </div>
                 ) : (
-                  <EsgTable rows={visibleRows} />
+                  <EsgTable
+                    rows={visibleRows}
+                    framework={framework}
+                    ifcNames={data.ifcNames ?? {}}
+                  />
                 )}
               </>
             )}
