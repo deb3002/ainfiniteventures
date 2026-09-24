@@ -8,7 +8,7 @@ import {
 } from "./esg";
 
 const indicators = parseKpiCatalogue(catalogue);
-const rows = indicators.map(kpiToRow);
+const rows = indicators.map((indicator) => kpiToRow(indicator));
 const matches = (framework = ALL_FRAMEWORKS, type = ALL_FRAMEWORK_TYPES, query = "") =>
   rows.filter((row) => rowMatches(row, ALL_THEMES, ALL_KEYWORDS, query, framework, type));
 
@@ -86,7 +86,7 @@ describe("KPI catalogue and framework filtering", () => {
     expect(selected).toHaveLength(1);
     const csv = buildCsv(selected);
     expect(csv).toContain('"KPI indicator"');
-    expect(csv).toContain('"No evidence linked"');
+    expect(csv).toContain('"No matching disclosure found"');
     expect(csv).toContain("KPIs.xlsx / CDP / row 2");
     expect(csv).toContain("Numeric Excel reference: review required");
     expect(csv).toContain("GRI: No reference supplied: Alignment not specified: Provisional");

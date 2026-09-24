@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EsgFilterBar } from "@/components/esg/EsgFilterBar";
 import { EsgTable } from "@/components/esg/EsgTable";
 import { parseKpiCatalogue } from "@/lib/esg-catalogue";
+import { buildEvidenceIndex, matchKpiEvidence } from "@/lib/esg-evidence";
 import {
   ALL_FRAMEWORKS,
   ALL_FRAMEWORK_TYPES,
@@ -67,7 +68,11 @@ const EsgProfile = () => {
     };
   }, []);
 
-  const rows = useMemo(() => [...(data?.rows ?? []), ...kpis.map(kpiToRow)], [data, kpis]);
+  const rows = useMemo(() => {
+    const disclosures = data?.rows ?? [];
+    const evidenceIndex = buildEvidenceIndex(disclosures);
+    return [...disclosures, ...kpis.map((kpi) => kpiToRow(kpi, matchKpiEvidence(kpi, evidenceIndex)))];
+  }, [data, kpis]);
   const themes = useMemo(() => [...new Set([...(data?.themes ?? []), ...kpis.map((kpi) => kpi.theme)])], [data, kpis]);
   const scopeRows = useMemo(() => rows.filter((row) => rowMatches(row, ALL_THEMES, ALL_KEYWORDS, search, framework, frameworkType)), [rows, framework, frameworkType, search]);
 
@@ -158,8 +163,8 @@ const EsgProfile = () => {
                 )}
                 {catalogueLoading && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading CDP/CSA indicators…</p>}
                 <p className="mb-6 text-sm text-muted-foreground">
-                  Explore company disclosures and CDP/CSA indicators. Workbook crosswalks are provisional;
-                  questionnaire year and applicability require review. An indicator is not evidence of a completed response or a rating.
+                  CDP/CSA indicators reuse existing company disclosures through the workbook’s GRI mappings.
+                  Direct, partial and contextual alignment describe the relationship; they do not establish a completed response or a rating.
                 </p>
                 <EsgFilterBar
                   themes={themes}

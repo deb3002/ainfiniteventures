@@ -1,3 +1,5 @@
+import { evidenceStatus, type EvidenceMatch } from "./esg-evidence";
+
 export interface EsgDocument {
   label: string;
   url: string | null;
@@ -35,6 +37,7 @@ export interface EsgSeries {
 export interface EsgRowData {
   id?: string;
   kpi?: EsgKpi;
+  evidence?: EvidenceMatch[];
   theme: string;
   category: string;
   subfactor: string;
@@ -99,19 +102,22 @@ export function frameworkMatchesType(framework: string, type: string) {
   return type === ALL_FRAMEWORK_TYPES || (FRAMEWORK_TYPE_MAP[framework] ?? []).includes(type);
 }
 
-export function kpiToRow(kpi: EsgKpi): EsgRowData {
+export function kpiToRow(kpi: EsgKpi, evidence: EvidenceMatch[] = []): EsgRowData {
   return {
     id: kpi.id,
     kpi,
+    evidence,
     theme: kpi.theme,
     category: `${kpi.framework} · ${kpi.topic}`,
     subfactor: kpi.indicator,
     keywords: [kpi.topic],
-    documents: [],
+    documents: [...new Map(evidence.flatMap((match) => match.disclosure.documents).map((doc) => [JSON.stringify(doc), doc])).values()],
     metrics: [],
     // Crosswalk references are not native GRI/BRSR disclosures or evidence.
     frameworks: [{ name: kpi.framework, detail: kpi.questionReference ?? undefined, verified: false }],
-    highlights: "No evidence linked. Company data has not been assessed against this indicator.",
+    highlights: evidence.length
+      ? "Existing company disclosures linked through the workbook’s GRI references. Alignment describes the crosswalk, not a completed questionnaire response."
+      : "No matching disclosure found in the existing GRI-mapped data.",
   };
 }
 export const IFC_ORDER = ["PS1", "PS2", "PS3", "PS4", "PS5", "PS6", "PS7", "PS8"];
@@ -162,6 +168,7 @@ export function rowMatches(
     row.keywords.join(" "),
     row.metrics.map((m) => m.label).join(" "),
     row.highlights,
+    row.evidence?.map(({ disclosure }) => [disclosure.subfactor, disclosure.highlights, ...disclosure.documents.map((doc) => doc.label)].join(" ")).join(" "),
     (row.frameworks ?? []).map((f) => [f.name, f.detail, f.full, f.indicator].filter(Boolean).join(" ")).join(" "),
     row.kpi?.id,
     row.kpi?.questionReference,
@@ -245,6 +252,7 @@ export function buildCsv(rows: EsgRowData[]) {
     "Evidence Status",
     "Crosswalk Mappings",
     "Catalogue Source",
+    "Linked Company Evidence",
   ];
   const lines = [header.map(csvEscape).join(",")];
 
@@ -279,9 +287,22 @@ export function buildCsv(rows: EsgRowData[]) {
         row.kpi ? row.kpi.version ?? "Not specified" : "",
         row.kpi ? row.kpi.industry ?? "Not specified" : "",
         row.kpi?.applicability,
-        row.kpi ? "No evidence linked" : "",
+        row.kpi ? evidenceStatus(row.evidence) : "",
         row.kpi?.mappings.map((m) => [m.framework, m.reference ?? "No reference supplied", m.title, m.section, m.principle, m.alignment ?? "Alignment not specified", "Provisional"].filter(Boolean).join(": ")).join(" | "),
         row.kpi ? `${row.kpi.source.file} / ${row.kpi.source.sheet} / row ${row.kpi.source.row}` : "",
+        row.evidence?.map((match) => JSON.stringify({
+          disclosure: match.disclosure.subfactor,
+          category: match.disclosure.category,
+          griReferences: match.references,
+          alignment: match.alignment,
+          broadReference: match.broad,
+          sourceFrameworks: match.disclosure.frameworks,
+          documents: match.disclosure.documents,
+          metrics: match.disclosure.metrics,
+          standalone: match.disclosure.standalone,
+          series: match.disclosure.series,
+          highlights: match.disclosure.highlights,
+        })).join("\n"),
       ]
         .map(csvEscape)
         .join(","),

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { EsgRowData, formatMetricValue } from "@/lib/esg";
 import { EsgSeriesChart } from "./EsgSeriesChart";
 import { KpiDetails } from "./KpiDetails";
+import { KpiEvidence } from "./KpiEvidence";
+import { evidenceStatus } from "@/lib/esg-evidence";
 
 export function EsgRow({ row }: { row: EsgRowData }) {
   const [expanded, setExpanded] = useState(false);
@@ -62,7 +64,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
         )}
       </td>
       <td className="py-5 pr-4 w-[16%]">
-        {row.kpi && <p className="text-sm text-muted-foreground">No evidence linked</p>}
+        {row.kpi && <p className="mb-3 text-sm text-muted-foreground">{evidenceStatus(row.evidence)}</p>}
         {row.documents.length > 0 && (
           <div className="flex flex-col gap-1.5">
             {row.documents.map((doc, i) =>
@@ -87,6 +89,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
       </td>
       <td className="py-5 w-[50%]">
         {row.kpi && <KpiDetails kpi={row.kpi} />}
+        {row.evidence?.map((match, index) => <KpiEvidence key={index} match={match} />)}
         {(series.length > 0 || standalone.length > 0) && (
           <div className="mb-4 flex flex-col gap-3">
             {series.map((s, i) => (

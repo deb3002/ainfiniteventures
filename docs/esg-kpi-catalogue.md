@@ -35,19 +35,34 @@ import script, not official framework classifications.
 - Crosswalks are displayed separately and searchable. They do not make a CDP/CSA
   indicator a native GRI/BRSR company disclosure, so existing framework filters
   preserve their original results.
-- The workbook contains no company values or reviewed evidence links. Imported
-  indicators therefore display **No evidence linked**. Existing illustrative
-  company values are not copied or inferred from shared GRI/BRSR codes.
+- `src/lib/esg-evidence.ts` joins workbook GRI disclosure references to existing
+  GRI-tagged company disclosures. Subclauses (305-1-a), ranges (303-1 to 303-5)
+  and slash lists (302-1/3/4) normalize to disclosure IDs. Duplicate matches to
+  the same source row are shown once, retaining every matching reference.
+- Matching indicators display the source disclosure's unchanged highlights,
+  metrics, series, reporting periods and documents with the workbook's Direct,
+  Partial or Contextual alignment. Values remain attached to their source
+  disclosure; the app does not extract or infer a new KPI value.
+- Explicit broad references such as `GRI 305 series` retrieve related disclosures
+  as Contextual information. Generic source tags such as `GRI 305` do not prove
+  a specific disclosure match. Missing/no-direct references remain unmatched.
+- BRSR crosswalks remain visible but are not used as numerical join keys: the
+  workbook and existing source use different question numbers for some topics
+  (for example emissions). GRI provides the shared reference bridge. Indicators
+  without a resolvable GRI match show **No matching disclosure found**; this does
+  not establish that the company lacks the information.
+- For the current supplied data, 81 CDP and 222 CSA indicators have matches;
+  35 CDP and 70 CSA indicators remain unmatched. These are reference-match counts,
+  not assessment completion or compliance counts.
 - Questionnaire year, industry and applicability remain unspecified/unconfirmed.
   CSA future-question topics are retained as supplied and are not presented as
   current mandatory requirements.
 - Numeric Excel references require review: a stored `1.1` cannot distinguish an
   original `1.1` from `1.10`. Do not repair these codes by guessing.
-- Before adding reviewed evidence, confirm questionnaire version and applicability,
-  assign stable IDs to the relevant company disclosure records, and maintain a
-  separate many-to-many evidence-link dataset with review status and coverage.
-  Partial and contextual alignment must not be treated as complete responses.
-  No official scores or completion percentages are calculated in this release.
+- Links are derived from the supplied crosswalk, not independently verified
+  questionnaire answers. Confirm version, applicability and the underlying
+  source mapping before claiming full coverage. No official scores or completion
+  percentages are calculated.
 
 ## Filtering and exports
 
@@ -59,6 +74,8 @@ restores the complete set.
 
 Framework counts count each matching row once per framework and respect the other
 filters. CDP groups by module and CSA by topic. CSV exports the visible records,
-including reference-review flags, provenance, alignment and missing-evidence status.
+including reference-review flags, provenance, alignment and evidence status. The
+Linked Company Evidence column preserves each matched disclosure and its values,
+series, source frameworks and documents as JSON, without merging their units or periods.
 Print includes active filters and the same visible table. Catalogue records remain
 visible when no evidence is linked.
