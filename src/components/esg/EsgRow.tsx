@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EsgRowData, formatMetricValue } from "@/lib/esg";
 import { EsgSeriesChart } from "./EsgSeriesChart";
+import { KpiDetails } from "./KpiDetails";
 
 export function EsgRow({ row }: { row: EsgRowData }) {
   const [expanded, setExpanded] = useState(false);
@@ -18,6 +19,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
     <tr className="border-b border-border/60 align-top">
       <td className="py-5 pr-4 w-[18%] text-sm font-medium text-foreground">
         {row.subfactor}
+        {row.kpi && <p className="mt-2 text-xs font-normal text-muted-foreground">KPI indicator</p>}
       </td>
       <td className="py-5 pr-4 w-[16%]">
         {frameworks.length > 0 && (
@@ -30,7 +32,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
                       ? "bg-accent/15 text-accent"
                       : "border border-dashed border-muted-foreground/50 text-muted-foreground"
                   }`}
-                  title={f.verified ? undefined : "Provisional mapping — unverified"}
+                  title={row.kpi ? "Indicator imported from the supplied workbook" : f.verified ? undefined : "Provisional mapping — unverified"}
                 >
                   {f.name}
                 </span>
@@ -60,6 +62,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
         )}
       </td>
       <td className="py-5 pr-4 w-[16%]">
+        {row.kpi && <p className="text-sm text-muted-foreground">No evidence linked</p>}
         {row.documents.length > 0 && (
           <div className="flex flex-col gap-1.5">
             {row.documents.map((doc, i) =>
@@ -83,6 +86,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
         )}
       </td>
       <td className="py-5 w-[50%]">
+        {row.kpi && <KpiDetails kpi={row.kpi} />}
         {(series.length > 0 || standalone.length > 0) && (
           <div className="mb-4 flex flex-col gap-3">
             {series.map((s, i) => (

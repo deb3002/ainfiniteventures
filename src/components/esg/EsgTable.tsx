@@ -37,21 +37,21 @@ export function EsgTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[860px] border-collapse text-left">
+    <div className="overflow-x-auto print:overflow-visible">
+      <table className="w-full min-w-[860px] border-collapse text-left print:min-w-0 print:table-fixed print:break-words">
         <thead className="print:table-header-group">
           <tr className="border-b border-border">
             <th scope="col" className="py-3 pr-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Sub Factor
+              Disclosure / Indicator
             </th>
             <th scope="col" className="py-3 pr-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
               Frameworks &amp; Keywords
             </th>
             <th scope="col" className="py-3 pr-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Documents
+              Evidence / Documents
             </th>
             <th scope="col" className="py-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Highlights
+              Details / Highlights
             </th>
           </tr>
         </thead>
@@ -76,13 +76,13 @@ export function EsgTable({
                       <span>{label.name}</span>
                       <span className="text-xs font-normal text-muted-foreground">
                         {groupRows.length}{" "}
-                        {groupRows.length === 1 ? "disclosure" : "disclosures"}
+                        {groupRows[0]?.kpi ? (groupRows.length === 1 ? "indicator" : "indicators") : (groupRows.length === 1 ? "disclosure" : "disclosures")}
                       </span>
                     </span>
                   </th>
                 </tr>
                 {groupRows.map((row, i) => (
-                  <EsgRow key={`${key}-${row.subfactor}-${i}`} row={row} />
+                  <EsgRow key={row.id ?? `${key}-${row.subfactor}-${i}`} row={row} />
                 ))}
               </Fragment>
             );

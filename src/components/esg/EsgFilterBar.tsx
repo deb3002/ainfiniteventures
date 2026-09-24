@@ -13,6 +13,9 @@ import {
   ALL_KEYWORDS,
   ALL_THEMES,
   FRAMEWORK_ORDER,
+  FRAMEWORK_TYPES,
+  ALL_FRAMEWORK_TYPES,
+  frameworkMatchesType,
 } from "@/lib/esg";
 
 interface EsgFilterBarProps {
@@ -26,6 +29,9 @@ interface EsgFilterBarProps {
   framework: string;
   frameworkCounts: Record<string, number>;
   onFrameworkChange: (value: string) => void;
+  frameworkType: string;
+  onFrameworkTypeChange: (value: string) => void;
+  onClearFilters: () => void;
   search: string;
   onSearchChange: (value: string) => void;
   onDownload: () => void;
@@ -45,6 +51,9 @@ export function EsgFilterBar({
   framework,
   frameworkCounts,
   onFrameworkChange,
+  frameworkType,
+  onFrameworkTypeChange,
+  onClearFilters,
   search,
   onSearchChange,
   onDownload,
@@ -54,10 +63,32 @@ export function EsgFilterBar({
 }: EsgFilterBarProps) {
   return (
     <div className="mb-8 print:hidden">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Select value={frameworkType} onValueChange={onFrameworkTypeChange}>
+            <SelectTrigger className="w-full" aria-label="Filter by framework type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_FRAMEWORK_TYPES}>{ALL_FRAMEWORK_TYPES}</SelectItem>
+              {FRAMEWORK_TYPES.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={framework} onValueChange={onFrameworkChange}>
+            <SelectTrigger className="w-full" aria-label="Filter by framework">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_FRAMEWORKS}>{ALL_FRAMEWORKS}</SelectItem>
+              {FRAMEWORK_ORDER.filter((f) => frameworkMatchesType(f, frameworkType)).map((f) => (
+                <SelectItem key={f} value={f}>
+                  {f} ({frameworkCounts[f] ?? 0})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={theme} onValueChange={onThemeChange}>
-            <SelectTrigger className="w-full sm:w-[220px]" aria-label="Filter by theme">
+            <SelectTrigger className="w-full" aria-label="Filter by theme">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -72,7 +103,7 @@ export function EsgFilterBar({
 
           <Select value={keyword} onValueChange={onKeywordChange}>
             <SelectTrigger
-              className="w-full sm:w-[240px]"
+              className="w-full"
               aria-label="Filter by keyword"
             >
               <SelectValue />
@@ -81,37 +112,20 @@ export function EsgFilterBar({
               <SelectItem value={ALL_KEYWORDS}>{ALL_KEYWORDS}</SelectItem>
               {keywords.map((kw) => (
                 <SelectItem key={kw} value={kw}>
-                  {kw} ({keywordCounts[kw]})
+                  {kw} ({keywordCounts[kw] ?? 0})
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Select value={framework} onValueChange={onFrameworkChange}>
-            <SelectTrigger
-              className="w-full sm:w-[210px]"
-              aria-label="Filter by framework"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_FRAMEWORKS}>{ALL_FRAMEWORKS}</SelectItem>
-              {FRAMEWORK_ORDER.filter((f) => frameworkCounts[f]).map((f) => (
-                <SelectItem key={f} value={f}>
-                  {f} ({frameworkCounts[f]})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="relative w-full sm:w-[260px]">
+          <div className="relative w-full sm:col-span-2">
             <Input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search disclosures…"
+              placeholder="Search disclosures, indicators or references…"
               autoComplete="off"
-              aria-label="Search disclosures"
+              aria-label="Search disclosures and indicators"
               className="pr-9"
             />
             {search.length > 0 && (
@@ -127,18 +141,19 @@ export function EsgFilterBar({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" size="sm" onClick={onDownload}>
             Download CSV
           </Button>
           <Button variant="outline" size="sm" onClick={onPrint}>
             Print / PDF
           </Button>
+          <Button variant="ghost" size="sm" onClick={onClearFilters}>Clear filters</Button>
         </div>
       </div>
 
       <p className="mt-4 text-sm text-muted-foreground" aria-live="polite">
-        Showing {visibleCount} of {totalCount} disclosures
+        Showing {visibleCount} of {totalCount} records (disclosures and KPI indicators)
       </p>
     </div>
   );

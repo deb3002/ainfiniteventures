@@ -33,6 +33,8 @@ export interface EsgSeries {
 }
 
 export interface EsgRowData {
+  id?: string;
+  kpi?: EsgKpi;
   theme: string;
   category: string;
   subfactor: string;
@@ -56,7 +58,62 @@ export interface EsgData {
 export const ALL_THEMES = "All Themes";
 export const ALL_KEYWORDS = "All Keywords";
 export const ALL_FRAMEWORKS = "All Frameworks";
-export const FRAMEWORK_ORDER = ["BRSR", "BRSR Core", "GRI", "IFC"];
+export const ALL_FRAMEWORK_TYPES = "All framework types";
+export const FRAMEWORK_TYPES = ["Reporting & disclosure", "Ratings & assessments", "Performance standards"];
+export const FRAMEWORK_ORDER = ["BRSR", "BRSR Core", "GRI", "CDP", "CSA", "IFC"];
+export const FRAMEWORK_TYPE_MAP: Record<string, string[]> = {
+  BRSR: [FRAMEWORK_TYPES[0]],
+  "BRSR Core": [FRAMEWORK_TYPES[0]],
+  GRI: [FRAMEWORK_TYPES[0]],
+  CDP: [FRAMEWORK_TYPES[0], FRAMEWORK_TYPES[1]],
+  CSA: [FRAMEWORK_TYPES[1]],
+  IFC: [FRAMEWORK_TYPES[2]],
+};
+
+export interface KpiMapping {
+  framework: "GRI" | "BRSR";
+  reference: string | null;
+  title?: string | null;
+  section?: string | null;
+  principle?: string | null;
+  alignment: string | null;
+  reviewStatus: "provisional";
+}
+
+export interface EsgKpi {
+  id: string;
+  framework: "CDP" | "CSA";
+  topic: string;
+  indicator: string;
+  theme: string;
+  questionReference: string | null;
+  referenceNeedsReview: boolean;
+  version: string | null;
+  industry: string | null;
+  applicability: "unconfirmed";
+  source: { file: string; sheet: string; row: number; originalReference: string | number | null };
+  mappings: KpiMapping[];
+}
+
+export function frameworkMatchesType(framework: string, type: string) {
+  return type === ALL_FRAMEWORK_TYPES || (FRAMEWORK_TYPE_MAP[framework] ?? []).includes(type);
+}
+
+export function kpiToRow(kpi: EsgKpi): EsgRowData {
+  return {
+    id: kpi.id,
+    kpi,
+    theme: kpi.theme,
+    category: `${kpi.framework} · ${kpi.topic}`,
+    subfactor: kpi.indicator,
+    keywords: [kpi.topic],
+    documents: [],
+    metrics: [],
+    // Crosswalk references are not native GRI/BRSR disclosures or evidence.
+    frameworks: [{ name: kpi.framework, detail: kpi.questionReference ?? undefined, verified: false }],
+    highlights: "No evidence linked. Company data has not been assessed against this indicator.",
+  };
+}
 export const IFC_ORDER = ["PS1", "PS2", "PS3", "PS4", "PS5", "PS6", "PS7", "PS8"];
 
 /** Group digits without rounding or altering the stored value. */
@@ -74,8 +131,8 @@ export function hasFramework(row: EsgRowData, name: string) {
 export function frameworkCounts(rows: EsgRowData[]) {
   const counts: Record<string, number> = {};
   rows.forEach((row) => {
-    (row.frameworks ?? []).forEach((f) => {
-      counts[f.name] = (counts[f.name] || 0) + 1;
+    new Set((row.frameworks ?? []).map((f) => f.name)).forEach((name) => {
+      counts[name] = (counts[name] || 0) + 1;
     });
   });
   return counts;
@@ -87,10 +144,16 @@ export function rowMatches(
   keyword: string,
   query: string,
   framework: string = ALL_FRAMEWORKS,
+  frameworkType: string = ALL_FRAMEWORK_TYPES,
 ) {
   if (theme !== ALL_THEMES && row.theme !== theme) return false;
   if (keyword !== ALL_KEYWORDS && !row.keywords.includes(keyword)) return false;
   if (framework !== ALL_FRAMEWORKS && !hasFramework(row, framework)) return false;
+  // Apply both constraints to the same framework, not unrelated tags on a row.
+  if (frameworkType !== ALL_FRAMEWORK_TYPES && !(row.frameworks ?? []).some(
+    (f) => (framework === ALL_FRAMEWORKS || f.name === framework) && frameworkMatchesType(f.name, frameworkType),
+  )) return false;
+  query = query.trim().toLowerCase();
   if (query === "") return true;
 
   const haystack = [
@@ -99,6 +162,10 @@ export function rowMatches(
     row.keywords.join(" "),
     row.metrics.map((m) => m.label).join(" "),
     row.highlights,
+    (row.frameworks ?? []).map((f) => [f.name, f.detail, f.full, f.indicator].filter(Boolean).join(" ")).join(" "),
+    row.kpi?.id,
+    row.kpi?.questionReference,
+    row.kpi?.mappings.map((m) => [m.framework, m.reference, m.title, m.section, m.principle, m.alignment].filter(Boolean).join(" ")).join(" "),
   ]
     .join(" ")
     .toLowerCase();
@@ -132,6 +199,7 @@ export function shortCode(category: string) {
 
 /** Which heading a row sits under, for the framework currently chosen. */
 export function groupKey(row: EsgRowData, framework: string) {
+  if (row.kpi) return `${row.kpi.framework} · ${row.kpi.topic}`;
   if (framework === "IFC") {
     const f = (row.frameworks ?? []).find((x) => x.name === "IFC");
     return f?.full ? f.full.split(", ")[0] : "PS-none";
@@ -167,6 +235,16 @@ export function buildCsv(rows: EsgRowData[]) {
     "Documents",
     "Metrics",
     "Highlights",
+    "Record Type",
+    "Indicator ID",
+    "Question Reference (source)",
+    "Reference Review",
+    "Questionnaire Version",
+    "Industry",
+    "Applicability",
+    "Evidence Status",
+    "Crosswalk Mappings",
+    "Catalogue Source",
   ];
   const lines = [header.map(csvEscape).join(",")];
 
@@ -194,6 +272,16 @@ export function buildCsv(rows: EsgRowData[]) {
         documents,
         metrics,
         row.highlights,
+        row.kpi ? "KPI indicator" : "Company disclosure",
+        row.kpi?.id,
+        row.kpi?.questionReference,
+        row.kpi?.referenceNeedsReview ? "Numeric Excel reference: review required" : "",
+        row.kpi ? row.kpi.version ?? "Not specified" : "",
+        row.kpi ? row.kpi.industry ?? "Not specified" : "",
+        row.kpi?.applicability,
+        row.kpi ? "No evidence linked" : "",
+        row.kpi?.mappings.map((m) => [m.framework, m.reference ?? "No reference supplied", m.title, m.section, m.principle, m.alignment ?? "Alignment not specified", "Provisional"].filter(Boolean).join(": ")).join(" | "),
+        row.kpi ? `${row.kpi.source.file} / ${row.kpi.source.sheet} / row ${row.kpi.source.row}` : "",
       ]
         .map(csvEscape)
         .join(","),
