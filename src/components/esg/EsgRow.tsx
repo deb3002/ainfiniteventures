@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { EsgRowData, formatMetricValue } from "@/lib/esg";
 import { EsgSeriesChart } from "./EsgSeriesChart";
-import { KpiDetails } from "./KpiDetails";
+import { KpiAlignment, KpiDetails } from "./KpiDetails";
 import { KpiEvidence } from "./KpiEvidence";
 import { evidenceStatus } from "@/lib/esg-evidence";
 
@@ -62,6 +62,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
             ))}
           </div>
         )}
+        {row.kpi && <KpiAlignment kpi={row.kpi} />}
       </td>
       <td className="py-5 pr-4 w-[16%]">
         {row.kpi && <p className="mb-3 text-sm text-muted-foreground">{evidenceStatus(row.evidence)}</p>}
