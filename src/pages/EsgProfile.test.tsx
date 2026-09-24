@@ -22,7 +22,9 @@ describe("ESG catalogue loading", () => {
     expect(screen.getByText("Existing energy disclosure")).toBeInTheDocument();
     expect(screen.getByText("Showing 2 of 2 records (disclosures and KPI indicators)")).toBeInTheDocument();
     expect(screen.getByText("No matching disclosure found")).toBeInTheDocument();
-    expect(screen.getByText(/Stored as a number in Excel/)).toBeInTheDocument();
+    expect(screen.queryByText(/Stored as a number in Excel/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Applicability: unconfirmed/)).not.toBeInTheDocument();
+    expect(screen.queryByText("1.2", { exact: true })).not.toBeInTheDocument();
   });
 
   it.each(["unavailable", "malformed"])("keeps existing disclosures usable when the catalogue is %s", async (failure) => {

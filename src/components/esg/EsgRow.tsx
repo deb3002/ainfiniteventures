@@ -38,7 +38,7 @@ export function EsgRow({ row }: { row: EsgRowData }) {
                 >
                   {f.name}
                 </span>
-                {f.detail && (
+                {f.detail && !row.kpi?.referenceNeedsReview && (
                   <span
                     className="text-[11px] text-muted-foreground"
                     title={f.source ? `Source: ${f.source}` : undefined}

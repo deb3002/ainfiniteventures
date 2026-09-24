@@ -163,8 +163,8 @@ const EsgProfile = () => {
                 )}
                 {catalogueLoading && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading CDP/CSA indicators…</p>}
                 <p className="mb-6 text-sm text-muted-foreground">
-                  CDP/CSA indicators reuse existing company disclosures through the workbook’s GRI mappings.
-                  Direct, partial and contextual alignment describe the relationship; they do not establish a completed response or a rating.
+                  Framework mappings indicate related disclosures.
+                  Coverage may vary by questionnaire year and industry and does not imply a completed assessment.
                 </p>
                 <EsgFilterBar
                   themes={themes}

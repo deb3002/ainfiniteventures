@@ -1,16 +1,18 @@
 import type { EsgKpi } from "@/lib/esg";
 
 export function KpiDetails({ kpi }: { kpi: EsgKpi }) {
+  const questionReference = kpi.referenceNeedsReview ? null : kpi.questionReference;
+  const context = [
+    kpi.version ? `Questionnaire year: ${kpi.version}` : null,
+    kpi.industry ? `Industry: ${kpi.industry}` : null,
+  ].filter(Boolean).join(" · ");
+  if (!questionReference && !context) return null;
   return (
     <div className="mb-4 space-y-3 text-sm">
-      {kpi.questionReference && (
-        <p><span className="font-medium">Question reference:</span> {kpi.questionReference}
-          {kpi.referenceNeedsReview && <span className="block text-xs text-muted-foreground">Stored as a number in Excel; verify the original question code.</span>}
-        </p>
+      {questionReference && (
+        <p><span className="font-medium">Question reference:</span> {questionReference}</p>
       )}
-      <p className="text-xs text-muted-foreground">
-        Questionnaire year: {kpi.version ?? "Not specified"} · Industry: {kpi.industry ?? "Not specified"} · Applicability: unconfirmed
-      </p>
+      {context && <p className="text-xs text-muted-foreground">{context}</p>}
     </div>
   );
 }
